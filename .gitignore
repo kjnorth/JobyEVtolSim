@@ -1,2 +1,5 @@
 # ignore microsoft word temporary files
 ~*
+
+# ignore the main executable. each machine will generate its own upon building the application.
+*.exe
