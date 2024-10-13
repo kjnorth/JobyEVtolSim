@@ -16,15 +16,15 @@ typedef enum {
 typedef enum {
   AIRCRAFT_STATE_IDLE = 0u,
   AIRCRAFT_STATE_FLYING,
-  AIRCRAFT_STATE_WAITING_TO_CHARGE,
   AIRCRAFT_STATE_CHARGING,
+  AIRCRAFT_STATE_WAITING_TO_CHARGE,
 } aircraft_state_t;
 
 class Aircraft
 {
 public:
   Aircraft(aircraft_id_t id);
-  void Print(uint32_t cruiseSpeedMph, uint32_t numPassengers);
+  void print(uint32_t cruiseSpeedMph, uint32_t numPassengers) const;
 
   aircraft_id_t m_id;
   aircraft_state_t m_state;
@@ -42,7 +42,7 @@ Aircraft::Aircraft(aircraft_id_t id)
   m_numFaults = 0;
 }
 
-inline void Aircraft::Print(uint32_t cruiseSpeedMph, uint32_t numPassengers) {
+inline void Aircraft::print(uint32_t cruiseSpeedMph, uint32_t numPassengers) const {
   float airTimeMin = m_airTimeTicks / (float) LOOP_TICKS_PER_MIN;
   float chargeTimeMin = m_chargeTimeTicks / (float) LOOP_TICKS_PER_MIN;
 
