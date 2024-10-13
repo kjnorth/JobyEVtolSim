@@ -1,3 +1,5 @@
+/* Defines the E-Vtol Aircraft class */
+
 #pragma once
 
 #include <cstdint>
@@ -19,19 +21,23 @@ typedef enum {
 
 class Aircraft
 {
-
 private:
   /* data */
 public:
   aircraft_id_t m_id;
   aircraft_state_t m_state;
-  uint32_t m_airTimeTicks;
-  uint32_t m_chargeTimeTicks;
+  uint32_t m_airTimeTicks; // this is in units of loop-step-ticks
+  uint32_t m_chargeTimeTicks; // this is in units of loop-step-ticks
   uint32_t m_numFaults;
 
-  Aircraft(/* args */);
+  Aircraft(aircraft_id_t id);
 };
 
-Aircraft::Aircraft(/* args */)
+Aircraft::Aircraft(aircraft_id_t id)
 {
+  m_id = id;
+  m_state = AIRCRAFT_STATE_IDLE;
+  m_airTimeTicks = 0;
+  m_chargeTimeTicks = 0;
+  m_numFaults = 0;
 }
