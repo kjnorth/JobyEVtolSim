@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <cstdint>
 
 typedef enum {
@@ -21,16 +22,15 @@ typedef enum {
 
 class Aircraft
 {
-private:
-  /* data */
 public:
+  Aircraft(aircraft_id_t id);
+  void Print(uint32_t cruiseSpeedMph, uint32_t numPassengers);
+
   aircraft_id_t m_id;
   aircraft_state_t m_state;
   uint32_t m_airTimeTicks; // this is in units of loop-step-ticks
   uint32_t m_chargeTimeTicks; // this is in units of loop-step-ticks
   uint32_t m_numFaults;
-
-  Aircraft(aircraft_id_t id);
 };
 
 Aircraft::Aircraft(aircraft_id_t id)
@@ -41,3 +41,23 @@ Aircraft::Aircraft(aircraft_id_t id)
   m_chargeTimeTicks = 0;
   m_numFaults = 0;
 }
+
+inline void Aircraft::Print(uint32_t cruiseSpeedMph, uint32_t numPassengers) {
+  float airTimeMin = m_airTimeTicks / (float) LOOP_TICKS_PER_MIN;
+  float chargeTimeMin = m_chargeTimeTicks / (float) LOOP_TICKS_PER_MIN;
+
+  // speed in miles/hour * (1hour / 60min) * airTimeMin
+  float distanceTraveled = (cruiseSpeedMph * airTimeMin) / 60.0f;
+  float passengerMiles = numPassengers * distanceTraveled;
+
+  std::cout <<
+    "Aircraft ID: " << m_id <<
+    "\nState: " << m_state <<
+    "\nFlight time: " << airTimeMin <<
+    "\nCharge time: " << chargeTimeMin <<
+    "\nNum faults: " << m_numFaults <<
+    "\nDistance traveled: " << distanceTraveled <<
+    "\nPassenger miles: " << passengerMiles <<
+    "\n-------------------\n" <<
+    std::endl;
+};

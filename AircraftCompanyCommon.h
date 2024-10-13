@@ -19,12 +19,14 @@
 
 #define LOOP_TICKS_PER_MIN        (5u)
 
+#define ALPHA_CRUISE_SPEED_MPH    (120u)
 #define ALPHA_FLIGHT_DUR_TICKS    (100u * LOOP_TICKS_PER_MIN) // 100 min * loop ticks per min
 #define ALPHA_CHARGE_DUR_TICKS    (36u * LOOP_TICKS_PER_MIN)
 #define ALPHA_PASSENGER_COUNT     (4u)
 #define ALPHA_FAULT_PROBABILITY   (0.25f)
 
 typedef struct {
+  uint32_t cruiseSpeedMph;
   uint32_t flightDurationTicks;
   uint32_t chargeDurationTicks;
   uint32_t passengerCount;
