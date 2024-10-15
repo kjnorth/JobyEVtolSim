@@ -2,6 +2,7 @@
  * 3 available chargers. */
 
 #include <iostream>
+#include <queue>
 
 #include "AircraftCompanyCommon.h"
 #include "Aircraft.h"
@@ -15,7 +16,7 @@
 #define SIMULATION_TICKS_3HR (180u * LOOP_TICKS_PER_MIN)
 
 #define TOTAL_AIRCRAFT_COMPANIES            (5u)
-#define TOTAL_AIRCRAFTS_IN_SIMULATION       (3u)
+#define TOTAL_AIRCRAFTS_IN_SIMULATION       (6u)
 
 /** Define data common to aircraft of the same company.
  * Use the aircraft id to index through this array. */
@@ -49,11 +50,15 @@ float GetFaultProbability(Aircraft* plane) {
 
 void RunSimulation(void) {
     ChargeStation battChargers;
+    std::queue<uint8_t> aircraftInLineToCharge;
 
     Aircraft aircrafts[TOTAL_AIRCRAFTS_IN_SIMULATION] = {
+        Aircraft(AIRCRAFT_ID_ALPHA),
         Aircraft(AIRCRAFT_ID_BRAVO),
         Aircraft(AIRCRAFT_ID_CHARLIE),
+        Aircraft(AIRCRAFT_ID_DELTA),
         Aircraft(AIRCRAFT_ID_ECHO),
+        Aircraft(AIRCRAFT_ID_CHARLIE),
     };
 
     uint32_t tickCount = 0;
@@ -63,6 +68,7 @@ void RunSimulation(void) {
     while (tickCount++ <= SIMULATION_TICKS_3HR) {
         for (uint8_t i = 0; i < TOTAL_AIRCRAFTS_IN_SIMULATION; i++) {
             Aircraft* pCurCraft = &aircrafts[i];
+            float timeMin = (tickCount - 1) / (float) LOOP_TICKS_PER_MIN;
             switch (pCurCraft->m_state) {
                 case AIRCRAFT_STATE_IDLE:
                     pCurCraft->m_state = AIRCRAFT_STATE_FLYING;
@@ -71,9 +77,11 @@ void RunSimulation(void) {
                     pCurCraft->m_airTimeTicks++;
                     if (IsBatteryDead(pCurCraft)) {
                         if (battChargers.addAircraft()) {
+                            // std::cout << "aircraft charging id: " << +i << " time: " << timeMin << std::endl;
                             pCurCraft->m_state = AIRCRAFT_STATE_CHARGING;
                         } else {
-                            // TODO: add this plane to the line
+                            aircraftInLineToCharge.push(i);
+                            // std::cout << "aircraft placed in line id: " << +i << " time: " << timeMin << std::endl;
                             pCurCraft->m_state = AIRCRAFT_STATE_WAITING_TO_CHARGE;
                         }
                     }
@@ -81,27 +89,32 @@ void RunSimulation(void) {
                 case AIRCRAFT_STATE_CHARGING:
                     pCurCraft->m_chargeTimeTicks++;
                     if (IsChargingComplete(pCurCraft)) {
+                        // std::cout << "aircraft completed charging id: " << +i << " time: " << timeMin << std::endl;
                         battChargers.removeAircraft();
                         pCurCraft->m_state = AIRCRAFT_STATE_FLYING;
 
-                        // TODO: it might make sense to add the next aircraft in charger line right here.
-                        // Otherwise, in the WAITING_TO_CHARGE state, we'll have to check that the current
-                        // aircraft we're looking at is the first in line before adding it. We don't
-                        // want anyone to get cut in line!
+                        if (aircraftInLineToCharge.size() > 0) {
+                            uint8_t aircraftIndex = aircraftInLineToCharge.front();
+                            if (battChargers.addAircraft()) {
+                                // std::cout << "aircraft charging id: " << +aircraftIndex << " time: " << timeMin << std::endl;
+                                aircrafts[aircraftIndex].m_state = AIRCRAFT_STATE_CHARGING;
+                                // pop the queue item now that we know an aircraft was successfully added to the charge station
+                                aircraftInLineToCharge.pop();
+                            } else {
+                                std::cout << "ERROR - adding aircraft to charger failed even though a charger should be available." << std::endl;
+                            }
+                        }
                     }
                     break;
                 case AIRCRAFT_STATE_WAITING_TO_CHARGE:
-
+                    /** Nothing happens when waiting to charge. In the CHARGING state, once an
+                     * aircraft finishes charging, the next one in line takes its place. */
                     break;
                 default:
                     std::cout << "ERROR - default case should never execute." << std::endl;
                     break;
             }
         }
-    }
-    for (uint8_t i = 0; i < TOTAL_AIRCRAFTS_IN_SIMULATION; i++) {
-        Aircraft* pCurCraft = &aircrafts[i];
-        pCurCraft->print(GetCruiseSpeed(pCurCraft), GetPassengerCount(pCurCraft));
     }
     std::cout << "Sim end. chargers in use: " << +battChargers.getNumChargersInUse() << std::endl;
 }
