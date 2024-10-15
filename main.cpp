@@ -7,12 +7,19 @@
 #include "Aircraft.h"
 #include "ChargeStation.h"
 
-#define TOTAL_AIRCRAFT_COMPANIES (5u)
+#define TOTAL_AIRCRAFT_COMPANIES            (5u)
+#define TOTAL_AIRCRAFTS_IN_SIMULATION       (2u)
+
+// TODO: create a class that contains the common data...
 
 /** Define data common to aircraft of the same company.
  * Use the aircraft id to index through this array. */
 aircraft_company_common_t G_AircraftCompanyCommon[TOTAL_AIRCRAFT_COMPANIES] = {
     {ALPHA_CRUISE_SPEED_MPH, ALPHA_FLIGHT_DUR_TICKS, ALPHA_CHARGE_DUR_TICKS, ALPHA_PASSENGER_COUNT, ALPHA_FAULT_PROBABILITY},
+    {0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0},
+    {DELTA_CRUISE_SPEED_MPH, DELTA_FLIGHT_DUR_TICKS, DELTA_CHARGE_DUR_TICKS, DELTA_PASSENGER_COUNT, DELTA_FAULT_PROBABILITY},
+    {0, 0, 0, 0, 0}
 };
 
 bool IsBatteryDead(Aircraft* plane) {
@@ -23,49 +30,78 @@ bool IsChargingComplete(Aircraft* plane) {
     return ((plane->m_chargeTimeTicks % G_AircraftCompanyCommon[plane->m_id].chargeDurationTicks) == 0);
 }
 
+uint32_t GetCruiseSpeed(Aircraft* plane) {
+    return G_AircraftCompanyCommon[plane->m_id].cruiseSpeedMph;
+}
+
+uint32_t GetPassengerCount(Aircraft* plane) {
+    return G_AircraftCompanyCommon[plane->m_id].passengerCount;
+}
+
+float GetFaultProbability(Aircraft* plane) {
+    return G_AircraftCompanyCommon[plane->m_id].faultProbability;
+}
+
 #define SIMULATION_TICKS_1HR (60u * LOOP_TICKS_PER_MIN) // 60min
 #define SIMULATION_TICKS_2HR (120u * LOOP_TICKS_PER_MIN)
 #define SIMULATION_TICKS_3HR (180u * LOOP_TICKS_PER_MIN)
 
 int main()
 {
-    ChargeStation cs;
-    Aircraft a1(AIRCRAFT_ID_ALPHA);
+    ChargeStation battChargers;
+
+    Aircraft aircrafts[TOTAL_AIRCRAFTS_IN_SIMULATION] = {
+        Aircraft(AIRCRAFT_ID_ALPHA),
+        Aircraft(AIRCRAFT_ID_DELTA)
+    };
 
     uint32_t tickCount = 0;
     /** Loop 1 extra time to initialize all aircraft into the flying state.
      * Then all recorded ticks will either be from flying, charging, or waiting
      * to charge. */
     while (tickCount++ <= SIMULATION_TICKS_3HR) {
-        switch (a1.m_state) {
-            case AIRCRAFT_STATE_IDLE:
-                a1.m_state = AIRCRAFT_STATE_FLYING;
-                break;
-            case AIRCRAFT_STATE_FLYING:
-                a1.m_airTimeTicks++;
-                if (IsBatteryDead(&a1)) {
-                    if (cs.addAircraft()) {
-                        a1.m_state = AIRCRAFT_STATE_CHARGING;
-                    } else {
-                        // TODO: add this plane to the line
-                        a1.m_state = AIRCRAFT_STATE_WAITING_TO_CHARGE;
+        for (uint8_t i = 0; i < TOTAL_AIRCRAFTS_IN_SIMULATION; i++) {
+            Aircraft* pCurCraft = &aircrafts[i];
+            switch (pCurCraft->m_state) {
+                case AIRCRAFT_STATE_IDLE:
+                    pCurCraft->m_state = AIRCRAFT_STATE_FLYING;
+                    break;
+                case AIRCRAFT_STATE_FLYING:
+                    pCurCraft->m_airTimeTicks++;
+                    if (IsBatteryDead(pCurCraft)) {
+                        if (battChargers.addAircraft()) {
+                            pCurCraft->m_state = AIRCRAFT_STATE_CHARGING;
+                        } else {
+                            // TODO: add this plane to the line
+                            pCurCraft->m_state = AIRCRAFT_STATE_WAITING_TO_CHARGE;
+                        }
                     }
-                }
-                break;
-            case AIRCRAFT_STATE_CHARGING:
-                a1.m_chargeTimeTicks++;
-                if (IsChargingComplete(&a1)) {
-                    a1.m_state = AIRCRAFT_STATE_FLYING;
-                }
-                break;
-            case AIRCRAFT_STATE_WAITING_TO_CHARGE:
+                    break;
+                case AIRCRAFT_STATE_CHARGING:
+                    pCurCraft->m_chargeTimeTicks++;
+                    if (IsChargingComplete(pCurCraft)) {
+                        battChargers.removeAircraft();
+                        pCurCraft->m_state = AIRCRAFT_STATE_FLYING;
 
-                break;
-            default:
-                std::cout << "ERROR - default case should never execute." << std::endl;
-                break;
+                        // TODO: it might make sense to add the next aircraft in charger line right here.
+                        // Otherwise, in the WAITING_TO_CHARGE state, we'll have to check that the current
+                        // aircraft we're looking at is the first in line before adding it. We don't
+                        // want anyone to get cut in line!
+                    }
+                    break;
+                case AIRCRAFT_STATE_WAITING_TO_CHARGE:
+
+                    break;
+                default:
+                    std::cout << "ERROR - default case should never execute." << std::endl;
+                    break;
+            }
         }
     }
 
-    a1.print(G_AircraftCompanyCommon[a1.m_id].cruiseSpeedMph, G_AircraftCompanyCommon[a1.m_id].passengerCount);
+    for (uint8_t i = 0; i < TOTAL_AIRCRAFTS_IN_SIMULATION; i++) {
+        Aircraft* pCurCraft = &aircrafts[i];
+        pCurCraft->print(GetCruiseSpeed(pCurCraft), GetPassengerCount(pCurCraft));
+    }
+    std::cout << "Sim end. chargers in use: " << +battChargers.getNumChargersInUse() << std::endl;
 }

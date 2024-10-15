@@ -11,6 +11,7 @@ private:
   uint8_t m_numChargersInUse;
 public:
   ChargeStation() {m_numChargersInUse = 0;}
+  uint8_t getNumChargersInUse(void) const {return m_numChargersInUse;}
   bool isChargerAvailable(void) const {return (m_numChargersInUse < TOTAL_CHARGERS);}
   bool addAircraft(void) {
     if (isChargerAvailable()) {

@@ -4,13 +4,6 @@
  * be in units of 0.2 second ticks.
  * 
  * If each tick is 0.2s, then there will be 5 ticks per simulation minute.
- * 
- * Common data:
- * 
- * Flight time until battery dies (loop step ticks)
- * Time to charge (loop step ticks)
- * Passenger count
- * Fault probability
  */
 
 #pragma once
@@ -24,6 +17,12 @@
 #define ALPHA_CHARGE_DUR_TICKS    (36u * LOOP_TICKS_PER_MIN)
 #define ALPHA_PASSENGER_COUNT     (4u)
 #define ALPHA_FAULT_PROBABILITY   (0.25f)
+
+#define DELTA_CRUISE_SPEED_MPH    (90u)
+#define DELTA_FLIGHT_DUR_TICKS    (100u * LOOP_TICKS_PER_MIN)
+#define DELTA_CHARGE_DUR_TICKS    ((uint32_t) (37.2f * LOOP_TICKS_PER_MIN)) // casting as uint32 to ensure data type aligns with the structure defined below
+#define DELTA_PASSENGER_COUNT     (2u)
+#define DELTA_FAULT_PROBABILITY   (0.22f)
 
 typedef struct {
   uint32_t cruiseSpeedMph;

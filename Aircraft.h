@@ -53,10 +53,10 @@ inline void Aircraft::print(uint32_t cruiseSpeedMph, uint32_t numPassengers) con
   std::cout <<
     "Aircraft ID: " << m_id <<
     "\nState: " << m_state <<
-    "\nFlight time: " << airTimeMin <<
-    "\nCharge time: " << chargeTimeMin <<
+    "\nFlight time: " << airTimeMin << " min" <<
+    "\nCharge time: " << chargeTimeMin << " min" <<
     "\nNum faults: " << m_numFaults <<
-    "\nDistance traveled: " << distanceTraveled <<
+    "\nDistance traveled: " << distanceTraveled << " miles" <<
     "\nPassenger miles: " << passengerMiles <<
     "\n-------------------\n" <<
     std::endl;
