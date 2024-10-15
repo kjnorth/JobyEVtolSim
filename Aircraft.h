@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cstdint>
 
+#include "AircraftCompanyCommon.h"
+
 typedef enum {
   AIRCRAFT_ID_ALPHA = 0u,
   AIRCRAFT_ID_BRAVO,

@@ -7,19 +7,24 @@
 #include "Aircraft.h"
 #include "ChargeStation.h"
 
-#define TOTAL_AIRCRAFT_COMPANIES            (5u)
-#define TOTAL_AIRCRAFTS_IN_SIMULATION       (2u)
+/** Use these definitions to test the simulation for different
+ * amounts of time. Verify recorded data matches expectations
+ * for 1, 2, and 3 hours of simulation time. */
+#define SIMULATION_TICKS_1HR (60u * LOOP_TICKS_PER_MIN) // 60min
+#define SIMULATION_TICKS_2HR (120u * LOOP_TICKS_PER_MIN)
+#define SIMULATION_TICKS_3HR (180u * LOOP_TICKS_PER_MIN)
 
-// TODO: create a class that contains the common data...
+#define TOTAL_AIRCRAFT_COMPANIES            (5u)
+#define TOTAL_AIRCRAFTS_IN_SIMULATION       (3u)
 
 /** Define data common to aircraft of the same company.
  * Use the aircraft id to index through this array. */
 aircraft_company_common_t G_AircraftCompanyCommon[TOTAL_AIRCRAFT_COMPANIES] = {
     {ALPHA_CRUISE_SPEED_MPH, ALPHA_FLIGHT_DUR_TICKS, ALPHA_CHARGE_DUR_TICKS, ALPHA_PASSENGER_COUNT, ALPHA_FAULT_PROBABILITY},
-    {0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0},
+    {BRAVO_CRUISE_SPEED_MPH, BRAVO_FLIGHT_DUR_TICKS, BRAVO_CHARGE_DUR_TICKS, BRAVO_PASSENGER_COUNT, BRAVO_FAULT_PROBABILITY},
+    {CHARLIE_CRUISE_SPEED_MPH, CHARLIE_FLIGHT_DUR_TICKS, CHARLIE_CHARGE_DUR_TICKS, CHARLIE_PASSENGER_COUNT, CHARLIE_FAULT_PROBABILITY},
     {DELTA_CRUISE_SPEED_MPH, DELTA_FLIGHT_DUR_TICKS, DELTA_CHARGE_DUR_TICKS, DELTA_PASSENGER_COUNT, DELTA_FAULT_PROBABILITY},
-    {0, 0, 0, 0, 0}
+    {ECHO_CRUISE_SPEED_MPH, ECHO_FLIGHT_DUR_TICKS, ECHO_CHARGE_DUR_TICKS, ECHO_PASSENGER_COUNT, ECHO_FAULT_PROBABILITY},
 };
 
 bool IsBatteryDead(Aircraft* plane) {
@@ -42,17 +47,13 @@ float GetFaultProbability(Aircraft* plane) {
     return G_AircraftCompanyCommon[plane->m_id].faultProbability;
 }
 
-#define SIMULATION_TICKS_1HR (60u * LOOP_TICKS_PER_MIN) // 60min
-#define SIMULATION_TICKS_2HR (120u * LOOP_TICKS_PER_MIN)
-#define SIMULATION_TICKS_3HR (180u * LOOP_TICKS_PER_MIN)
-
-int main()
-{
+void RunSimulation(void) {
     ChargeStation battChargers;
 
     Aircraft aircrafts[TOTAL_AIRCRAFTS_IN_SIMULATION] = {
-        Aircraft(AIRCRAFT_ID_ALPHA),
-        Aircraft(AIRCRAFT_ID_DELTA)
+        Aircraft(AIRCRAFT_ID_BRAVO),
+        Aircraft(AIRCRAFT_ID_CHARLIE),
+        Aircraft(AIRCRAFT_ID_ECHO),
     };
 
     uint32_t tickCount = 0;
@@ -98,10 +99,14 @@ int main()
             }
         }
     }
-
     for (uint8_t i = 0; i < TOTAL_AIRCRAFTS_IN_SIMULATION; i++) {
         Aircraft* pCurCraft = &aircrafts[i];
         pCurCraft->print(GetCruiseSpeed(pCurCraft), GetPassengerCount(pCurCraft));
     }
     std::cout << "Sim end. chargers in use: " << +battChargers.getNumChargersInUse() << std::endl;
+}
+
+int main()
+{
+    RunSimulation();
 }
