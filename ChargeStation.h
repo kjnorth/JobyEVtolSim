@@ -1,6 +1,8 @@
 /** Defines the charge station class. Only 3 chargers are availbe for use.
  * Note that only one instance of this class will be used in the application. */
 
+#pragma once
+
 #include <cstdint>
 
 #define TOTAL_CHARGERS (3u)

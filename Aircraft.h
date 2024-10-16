@@ -31,10 +31,13 @@ public:
   Aircraft(aircraft_id_t id);
   void print(uint32_t cruiseSpeedMph, uint32_t numPassengers) const;
 
+  // All of these member variables are public so the simulation can access/modify them easily
   aircraft_id_t m_id;
   aircraft_state_t m_state;
   uint32_t m_airTimeTicks; // this is in units of loop-step-ticks
+  uint32_t m_numFlights; // number of times the aircraft took off
   uint32_t m_chargeTimeTicks; // this is in units of loop-step-ticks
+  uint32_t m_numChargeSessions; // number of times the aircraft went to the charging station
   uint32_t m_numFaults;
 };
 
@@ -42,7 +45,9 @@ Aircraft::Aircraft() {
   m_id = AIRCRAFT_ID_ALPHA;
   m_state = AIRCRAFT_STATE_IDLE;
   m_airTimeTicks = 0;
+  m_numFlights = 0;
   m_chargeTimeTicks = 0;
+  m_numChargeSessions = 0;
   m_numFaults = 0;
 }
 
@@ -51,7 +56,9 @@ Aircraft::Aircraft(aircraft_id_t id)
   m_id = id;
   m_state = AIRCRAFT_STATE_IDLE;
   m_airTimeTicks = 0;
+  m_numFlights = 0;
   m_chargeTimeTicks = 0;
+  m_numChargeSessions = 0;
   m_numFaults = 0;
 }
 
@@ -68,6 +75,7 @@ inline void Aircraft::print(uint32_t cruiseSpeedMph, uint32_t numPassengers) con
     "\nState: " << m_state <<
     "\nFlight time: " << airTimeMin << " min" <<
     "\nCharge time: " << chargeTimeMin << " min" <<
+    "\nCharge sessions: " << m_numChargeSessions <<
     "\nNum faults: " << m_numFaults <<
     "\nDistance traveled: " << distanceTraveled << " miles" <<
     "\nPassenger miles: " << passengerMiles <<
