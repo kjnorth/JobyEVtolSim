@@ -16,7 +16,9 @@
 #define SIMULATION_TICKS_3HR (180u * LOOP_TICKS_PER_MIN)
 
 #define TOTAL_AIRCRAFT_COMPANIES            (5u)
-#define TOTAL_AIRCRAFTS_IN_SIMULATION       (6u)
+#define TOTAL_AIRCRAFTS_IN_SIMULATION       (10u)
+
+#define ENABLE_TRACE // uncomment to enable trace output to the terminal
 
 /** Define data common to aircraft of the same company.
  * Use the aircraft id to index through this array. */
@@ -48,6 +50,35 @@ float GetFaultProbability(Aircraft* plane) {
     return G_AircraftCompanyCommon[plane->m_id].faultProbability;
 }
 
+void TraceStartCharging(uint8_t arrayIndex, float timeMin, uint8_t numChargersInUse) {
+    #ifdef ENABLE_TRACE
+        std::cout <<
+            "start charging - array index: " << +arrayIndex <<
+            ", time: " << timeMin << " min" <<
+            ", chargers in use: " << +numChargersInUse <<
+            std::endl;
+    #endif
+}
+
+void TraceFinishCharging(uint8_t arrayIndex, float timeMin, uint8_t numChargersInUse) {
+    #ifdef ENABLE_TRACE
+        std::cout <<
+            "completed charging - array index: " << +arrayIndex <<
+            ", time: " << timeMin << " min" <<
+            ", chargers in use: " << +numChargersInUse <<
+            std::endl;
+    #endif
+}
+
+void TraceAddedToLine(uint8_t arrayIndex, float timeMin) {
+    #ifdef ENABLE_TRACE
+        std::cout <<
+            "placed in line - array index: " << +arrayIndex <<
+            ", time: " << timeMin << " min" <<
+            std::endl;
+    #endif
+}
+
 void RunSimulation(void) {
     ChargeStation battChargers;
     std::queue<uint8_t> aircraftInLineToCharge;
@@ -58,7 +89,12 @@ void RunSimulation(void) {
         Aircraft(AIRCRAFT_ID_CHARLIE),
         Aircraft(AIRCRAFT_ID_DELTA),
         Aircraft(AIRCRAFT_ID_ECHO),
+
+        Aircraft(AIRCRAFT_ID_ECHO),
+        Aircraft(AIRCRAFT_ID_DELTA),
         Aircraft(AIRCRAFT_ID_CHARLIE),
+        Aircraft(AIRCRAFT_ID_BRAVO),
+        Aircraft(AIRCRAFT_ID_ALPHA),
     };
 
     uint32_t tickCount = 0;
@@ -66,9 +102,11 @@ void RunSimulation(void) {
      * Then all recorded ticks will either be from flying, charging, or waiting
      * to charge. */
     while (tickCount++ <= SIMULATION_TICKS_3HR) {
+        // subtract 1 from tickCount to account for initialization when i = 0
+        float timeMin = (tickCount - 1) / (float) LOOP_TICKS_PER_MIN;
+
         for (uint8_t i = 0; i < TOTAL_AIRCRAFTS_IN_SIMULATION; i++) {
             Aircraft* pCurCraft = &aircrafts[i];
-            float timeMin = (tickCount - 1) / (float) LOOP_TICKS_PER_MIN;
             switch (pCurCraft->m_state) {
                 case AIRCRAFT_STATE_IDLE:
                     pCurCraft->m_state = AIRCRAFT_STATE_FLYING;
@@ -76,47 +114,51 @@ void RunSimulation(void) {
                 case AIRCRAFT_STATE_FLYING:
                     pCurCraft->m_airTimeTicks++;
                     if (IsBatteryDead(pCurCraft)) {
-                        if (battChargers.addAircraft()) {
-                            // std::cout << "aircraft charging id: " << +i << " time: " << timeMin << std::endl;
-                            pCurCraft->m_state = AIRCRAFT_STATE_CHARGING;
-                        } else {
-                            aircraftInLineToCharge.push(i);
-                            // std::cout << "aircraft placed in line id: " << +i << " time: " << timeMin << std::endl;
-                            pCurCraft->m_state = AIRCRAFT_STATE_WAITING_TO_CHARGE;
-                        }
+                        aircraftInLineToCharge.push(i);
+                        pCurCraft->m_state = AIRCRAFT_STATE_WAITING_TO_CHARGE;
                     }
                     break;
                 case AIRCRAFT_STATE_CHARGING:
                     pCurCraft->m_chargeTimeTicks++;
                     if (IsChargingComplete(pCurCraft)) {
-                        // std::cout << "aircraft completed charging id: " << +i << " time: " << timeMin << std::endl;
                         battChargers.removeAircraft();
+                        TraceFinishCharging(i, timeMin, battChargers.getNumChargersInUse());
                         pCurCraft->m_state = AIRCRAFT_STATE_FLYING;
-
-                        if (aircraftInLineToCharge.size() > 0) {
-                            uint8_t aircraftIndex = aircraftInLineToCharge.front();
-                            if (battChargers.addAircraft()) {
-                                // std::cout << "aircraft charging id: " << +aircraftIndex << " time: " << timeMin << std::endl;
-                                aircrafts[aircraftIndex].m_state = AIRCRAFT_STATE_CHARGING;
-                                // pop the queue item now that we know an aircraft was successfully added to the charge station
-                                aircraftInLineToCharge.pop();
-                            } else {
-                                std::cout << "ERROR - adding aircraft to charger failed even though a charger should be available." << std::endl;
-                            }
-                        }
                     }
                     break;
                 case AIRCRAFT_STATE_WAITING_TO_CHARGE:
-                    /** Nothing happens when waiting to charge. In the CHARGING state, once an
-                     * aircraft finishes charging, the next one in line takes its place. */
+                    /** Nothing happens when waiting to charge. Once the loop cycle completes,
+                     * planes in line are added to chargers that may have become available. */
                     break;
                 default:
                     std::cout << "ERROR - default case should never execute." << std::endl;
                     break;
             }
         }
+
+        /** Now that the loop cycle has completed, add aircraft to chargers if any are available.
+         * This implementation prevents timing issues from occurring.
+         * The original method was:
+         * In the charging state, if an aircraft finishes charging, add the next one in line to
+         * the free charger. This caused timing problems because if the next plane in line had
+         * a larger index than the plane that just finished charging, the loop would reach the
+         * next plane during the same cycle, and increment it's charge ticks. We'd see in the
+         * trace that an aircraft finished charging at 63.98 minutes for example, when the
+         * expected time to finish charging was 64 minutes.
+         */
+        while ((battChargers.getNumChargersInUse() < TOTAL_CHARGERS) && (aircraftInLineToCharge.size() > 0)) {
+            uint8_t aircraftIndex = aircraftInLineToCharge.front();
+            if (battChargers.addAircraft()) {
+                TraceStartCharging(aircraftIndex, timeMin, battChargers.getNumChargersInUse());
+                aircrafts[aircraftIndex].m_state = AIRCRAFT_STATE_CHARGING;
+                // pop the queue item now that we know an aircraft was successfully added to the charge station
+                aircraftInLineToCharge.pop();
+            } else {
+                std::cout << "ERROR - adding aircraft to charger failed even though a charger should be available." << std::endl;
+            }
+        }
     }
-    std::cout << "Sim end. chargers in use: " << +battChargers.getNumChargersInUse() << std::endl;
+    aircrafts[8].print(GetCruiseSpeed(&aircrafts[8]), GetPassengerCount(&aircrafts[8]));
 }
 
 int main()
