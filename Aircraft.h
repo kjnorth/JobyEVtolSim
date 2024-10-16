@@ -13,6 +13,8 @@ typedef enum {
   AIRCRAFT_ID_CHARLIE,
   AIRCRAFT_ID_DELTA,
   AIRCRAFT_ID_ECHO,
+
+  TOTAL_AIRCRAFT_COMPANIES
 } aircraft_id_t;
 
 typedef enum {
@@ -25,6 +27,7 @@ typedef enum {
 class Aircraft
 {
 public:
+  Aircraft(); // default constructor exists to instantiate array of default aircrafts before randomly assigning ID's
   Aircraft(aircraft_id_t id);
   void print(uint32_t cruiseSpeedMph, uint32_t numPassengers) const;
 
@@ -34,6 +37,14 @@ public:
   uint32_t m_chargeTimeTicks; // this is in units of loop-step-ticks
   uint32_t m_numFaults;
 };
+
+Aircraft::Aircraft() {
+  m_id = AIRCRAFT_ID_ALPHA;
+  m_state = AIRCRAFT_STATE_IDLE;
+  m_airTimeTicks = 0;
+  m_chargeTimeTicks = 0;
+  m_numFaults = 0;
+}
 
 Aircraft::Aircraft(aircraft_id_t id)
 {

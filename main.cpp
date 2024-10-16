@@ -1,12 +1,16 @@
 /** E-Vtol simulation of 20 planes flying and recharging using only
  * 3 available chargers. */
 
+#include <cstdlib> 
+#include <ctime>
 #include <iostream>
 #include <queue>
 
 #include "AircraftCompanyCommon.h"
 #include "Aircraft.h"
 #include "ChargeStation.h"
+
+// #define ENABLE_TRACE // uncomment to enable trace output to the terminal
 
 /** Use these definitions to test the simulation for different
  * amounts of time. Verify recorded data matches expectations
@@ -15,10 +19,7 @@
 #define SIMULATION_TICKS_2HR (120u * LOOP_TICKS_PER_MIN)
 #define SIMULATION_TICKS_3HR (180u * LOOP_TICKS_PER_MIN)
 
-#define TOTAL_AIRCRAFT_COMPANIES            (5u)
-#define TOTAL_AIRCRAFTS_IN_SIMULATION       (10u)
-
-#define ENABLE_TRACE // uncomment to enable trace output to the terminal
+#define TOTAL_AIRCRAFTS_IN_SIMULATION       (20u)
 
 /** Define data common to aircraft of the same company.
  * Use the aircraft id to index through this array. */
@@ -79,23 +80,37 @@ void TraceAddedToLine(uint8_t arrayIndex, float timeMin) {
     #endif
 }
 
+void CreateRandomAircraftIds(Aircraft* aircrafts) {
+    bool verifyAllIdsGenerated[TOTAL_AIRCRAFT_COMPANIES] = {false};
+    for (uint8_t i = 0; i < TOTAL_AIRCRAFTS_IN_SIMULATION; i++) {
+        aircraft_id_t randomId = (aircraft_id_t) (rand() % 5);
+        aircrafts[i].m_id = randomId;
+        verifyAllIdsGenerated[randomId] = true;
+    }
+
+    /** Verify at least one of each aircraft company exists in the array. If this
+     * test fails, simply exit and rerun simulation. If this fails frequently, we
+     * can come up with a method to populate the array with the missind ID(s). */
+    for (uint8_t i = 0; i < TOTAL_AIRCRAFT_COMPANIES; i++) {
+        if (verifyAllIdsGenerated[i] == false) {
+            std::cout << "ERROR - all aircraft IDs were not generated." << std::endl;
+            std::cout.flush();
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
 void RunSimulation(void) {
+    // Use current time as seed for random generator
+    srand(time(0));
+
+    // create the array of 20 aircraft with random IDs
+    Aircraft aircrafts[TOTAL_AIRCRAFTS_IN_SIMULATION];
+    CreateRandomAircraftIds(aircrafts);
+
+    // Test pased. Continue with the simulation
     ChargeStation battChargers;
     std::queue<uint8_t> aircraftInLineToCharge;
-
-    Aircraft aircrafts[TOTAL_AIRCRAFTS_IN_SIMULATION] = {
-        Aircraft(AIRCRAFT_ID_ALPHA),
-        Aircraft(AIRCRAFT_ID_BRAVO),
-        Aircraft(AIRCRAFT_ID_CHARLIE),
-        Aircraft(AIRCRAFT_ID_DELTA),
-        Aircraft(AIRCRAFT_ID_ECHO),
-
-        Aircraft(AIRCRAFT_ID_ECHO),
-        Aircraft(AIRCRAFT_ID_DELTA),
-        Aircraft(AIRCRAFT_ID_CHARLIE),
-        Aircraft(AIRCRAFT_ID_BRAVO),
-        Aircraft(AIRCRAFT_ID_ALPHA),
-    };
 
     uint32_t tickCount = 0;
     /** Loop 1 extra time to initialize all aircraft into the flying state.
