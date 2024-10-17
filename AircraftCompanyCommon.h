@@ -16,37 +16,39 @@
 
 #include "Aircraft.h"
 
-#define LOOP_TICKS_PER_MIN          (50u)
+#define TOTAL_AIRCRAFTS_IN_SIMULATION   (20u)
 
-#define ALPHA_CRUISE_SPEED_MPH      (120u)
-#define ALPHA_FLIGHT_DUR_TICKS      (100u * LOOP_TICKS_PER_MIN) // 100 min
-#define ALPHA_CHARGE_DUR_TICKS      (36u * LOOP_TICKS_PER_MIN)
-#define ALPHA_PASSENGER_COUNT       (4u)
-#define ALPHA_FAULT_PROB_PER_HR     (0.25f) // fault probability per hour
+#define LOOP_TICKS_PER_MIN              (50u)
 
-#define BRAVO_CRUISE_SPEED_MPH      (100u)
-#define BRAVO_FLIGHT_DUR_TICKS      (40u * LOOP_TICKS_PER_MIN)
-#define BRAVO_CHARGE_DUR_TICKS      (12u * LOOP_TICKS_PER_MIN)
-#define BRAVO_PASSENGER_COUNT       (5u)
-#define BRAVO_FAULT_PROB_PER_HR     (0.10f)
+#define ALPHA_CRUISE_SPEED_MPH          (120u)
+#define ALPHA_FLIGHT_DUR_TICKS          (100u * LOOP_TICKS_PER_MIN) // 100 min
+#define ALPHA_CHARGE_DUR_TICKS          (36u * LOOP_TICKS_PER_MIN)
+#define ALPHA_PASSENGER_COUNT           (4u)
+#define ALPHA_FAULT_PROB_PER_HR         (0.25f) // fault probability per hour
 
-#define CHARLIE_CRUISE_SPEED_MPH    (160u)
-#define CHARLIE_FLIGHT_DUR_TICKS    ((uint32_t) (37.5f * LOOP_TICKS_PER_MIN)) // casting as uint32 to ensure data type aligns with the structure defined below
-#define CHARLIE_CHARGE_DUR_TICKS    (48u * LOOP_TICKS_PER_MIN)
-#define CHARLIE_PASSENGER_COUNT     (3u)
-#define CHARLIE_FAULT_PROB_PER_HR   (0.05f)
+#define BRAVO_CRUISE_SPEED_MPH          (100u)
+#define BRAVO_FLIGHT_DUR_TICKS          (40u * LOOP_TICKS_PER_MIN)
+#define BRAVO_CHARGE_DUR_TICKS          (12u * LOOP_TICKS_PER_MIN)
+#define BRAVO_PASSENGER_COUNT           (5u)
+#define BRAVO_FAULT_PROB_PER_HR         (0.10f)
 
-#define DELTA_CRUISE_SPEED_MPH      (90u)
-#define DELTA_FLIGHT_DUR_TICKS      (100u * LOOP_TICKS_PER_MIN)
-#define DELTA_CHARGE_DUR_TICKS      ((uint32_t) (37.2f * LOOP_TICKS_PER_MIN)) // casting as uint32 to ensure data type aligns with the structure defined below
-#define DELTA_PASSENGER_COUNT       (2u)
-#define DELTA_FAULT_PROB_PER_HR     (0.22f)
+#define CHARLIE_CRUISE_SPEED_MPH        (160u)
+#define CHARLIE_FLIGHT_DUR_TICKS        ((uint32_t) (37.5f * LOOP_TICKS_PER_MIN)) // casting as uint32 to ensure data type aligns with the structure defined below
+#define CHARLIE_CHARGE_DUR_TICKS        (48u * LOOP_TICKS_PER_MIN)
+#define CHARLIE_PASSENGER_COUNT         (3u)
+#define CHARLIE_FAULT_PROB_PER_HR       (0.05f)
 
-#define ECHO_CRUISE_SPEED_MPH       (30u)
-#define ECHO_FLIGHT_DUR_TICKS       ((uint32_t) (51.72f * LOOP_TICKS_PER_MIN)) // casting as uint32 to ensure data type aligns with the structure defined below
-#define ECHO_CHARGE_DUR_TICKS       (18u * LOOP_TICKS_PER_MIN)
-#define ECHO_PASSENGER_COUNT        (2u)
-#define ECHO_FAULT_PROB_PER_HR      (0.61f)
+#define DELTA_CRUISE_SPEED_MPH          (90u)
+#define DELTA_FLIGHT_DUR_TICKS          (100u * LOOP_TICKS_PER_MIN)
+#define DELTA_CHARGE_DUR_TICKS          ((uint32_t) (37.2f * LOOP_TICKS_PER_MIN)) // casting as uint32 to ensure data type aligns with the structure defined below
+#define DELTA_PASSENGER_COUNT           (2u)
+#define DELTA_FAULT_PROB_PER_HR         (0.22f)
+
+#define ECHO_CRUISE_SPEED_MPH           (30u)
+#define ECHO_FLIGHT_DUR_TICKS           ((uint32_t) (51.72f * LOOP_TICKS_PER_MIN)) // casting as uint32 to ensure data type aligns with the structure defined below
+#define ECHO_CHARGE_DUR_TICKS           (18u * LOOP_TICKS_PER_MIN)
+#define ECHO_PASSENGER_COUNT            (2u)
+#define ECHO_FAULT_PROB_PER_HR          (0.61f)
 
 typedef struct {
   uint32_t cruiseSpeedMph;
