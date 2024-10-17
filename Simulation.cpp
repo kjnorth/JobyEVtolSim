@@ -107,5 +107,4 @@ void RunSimulation(void) {
     
     // Simulation has finished. Write data to output file.
     WriteDataToOutputFile(aircrafts);
-    aircrafts[8].print(GetCruiseSpeed(aircrafts[8].m_id), GetPassengerCount(aircrafts[8].m_id));
 }

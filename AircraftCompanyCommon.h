@@ -60,6 +60,9 @@ typedef struct {
 
 bool IsBatteryDead(Aircraft* plane);
 bool IsChargingComplete(Aircraft* plane);
-uint32_t GetCruiseSpeed(aircraft_id_t id);
+
+uint32_t GetFlightDurTicks(aircraft_id_t id);
+uint32_t GetChargeDurTicks(aircraft_id_t id);
+uint32_t GetCruiseSpeedMph(aircraft_id_t id);
 uint32_t GetPassengerCount(aircraft_id_t id);
 float GetFaultProbabilityPerHour(aircraft_id_t id);

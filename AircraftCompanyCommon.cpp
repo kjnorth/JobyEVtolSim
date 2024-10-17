@@ -18,7 +18,15 @@ bool IsChargingComplete(Aircraft* plane) {
     return ((plane->m_chargeTimeTicks % G_AircraftCompanyCommon[plane->m_id].chargeDurationTicks) == 0);
 }
 
-uint32_t GetCruiseSpeed(aircraft_id_t id) {
+uint32_t GetFlightDurTicks(aircraft_id_t id) {
+    return G_AircraftCompanyCommon[id].flightDurationTicks;
+}
+
+uint32_t GetChargeDurTicks(aircraft_id_t id) {
+    return G_AircraftCompanyCommon[id].chargeDurationTicks;
+}
+
+uint32_t GetCruiseSpeedMph(aircraft_id_t id) {
     return G_AircraftCompanyCommon[id].cruiseSpeedMph;
 }
 

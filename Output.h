@@ -4,4 +4,5 @@
 
 #include "Aircraft.h"
 
+void TestCalculations(void);
 void WriteDataToOutputFile(Aircraft* aircrafts);
