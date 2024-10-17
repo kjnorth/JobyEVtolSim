@@ -1,8 +1,13 @@
+#include<bits/stdc++.h>
 #include <iostream>
+#include <fstream>
+#include <string>
 
 #include "Output.h"
 
 #include "AircraftCompanyCommon.h"
+
+using namespace std;
 
 enum dataSumIndicies {
   TOTAL_FLIGHT_TIME_MIN_IDX = 0u,
@@ -91,7 +96,7 @@ void TestCalculations(void) {
     aircrafts[i].m_numFaults = 1;
   }
 
-  data_avgs_and_totals_t averagesAndTotals[TOTAL_AIRCRAFT_COMPANIES]; // calculations returned into this array
+  data_avgs_and_totals_t averagesAndTotals[TOTAL_AIRCRAFT_COMPANIES]; // results of calculations stored in this array
   ComputeDataAveragesAndTotals(averagesAndTotals, aircrafts);
 
   // output to terminal
@@ -110,5 +115,36 @@ void TestCalculations(void) {
 }
 
 void WriteDataToOutputFile(Aircraft* aircrafts) {
-  
+  // mapping of aircraft id to name
+  std::string aircraftIdToString[TOTAL_AIRCRAFT_COMPANIES] = {
+    "Alpha", "Bravo", "Charlie", "Delta", "Echo"
+  };
+
+  data_avgs_and_totals_t averagesAndTotals[TOTAL_AIRCRAFT_COMPANIES]; // results of calculations stored in this array
+  ComputeDataAveragesAndTotals(averagesAndTotals, aircrafts);
+
+  ofstream myfile;
+  myfile.open ("SimulationOutput.txt");
+
+  for (uint8_t i = 0; i < TOTAL_AIRCRAFT_COMPANIES; i++) {
+    float avgDistanceTraveled = (GetCruiseSpeedMph((aircraft_id_t) i) * averagesAndTotals[i].avgMinPerFlight) / 60.0f;
+    myfile << fixed << setprecision(2) <<
+      aircraftIdToString[i] << " - "  <<
+      "avg flight time: " << averagesAndTotals[i].avgMinPerFlight << " min, " <<
+      "avg distance traveled: " << avgDistanceTraveled << " miles,\n" <<
+      "avg time charging: " << averagesAndTotals[i].avgMinPerChargeSession << " min, " <<
+      "total num faults: " << averagesAndTotals[i].totalNumFaults << ", " <<
+      "total passenger miles: " << averagesAndTotals[i].totalPassengerMiles << " miles" <<
+      "\n----------------------------------------------------------------------------------------\n";
+  }
+
+  myfile.close();
+}
+
+void WriteRandomIdErrorToOutputFile(void) {
+  ofstream myfile;
+  myfile.open ("SimulationOutput.txt");
+  myfile << "ERROR - all aircraft IDs were not generated. Run simulation again.\n";
+  myfile.flush();
+  myfile.close();
 }

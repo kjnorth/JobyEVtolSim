@@ -4,6 +4,7 @@
 #include "RandomGen.h"
 
 #include "AircraftCompanyCommon.h"
+#include "Output.h"
 
 void CreateRandomAircraftIds(Aircraft* aircrafts) {
     // Use current time as seed for random generator
@@ -23,6 +24,9 @@ void CreateRandomAircraftIds(Aircraft* aircrafts) {
         if (verifyAllIdsGenerated[i] == false) {
             std::cout << "ERROR - all aircraft IDs were not generated." << std::endl;
             std::cout.flush();
+
+            WriteRandomIdErrorToOutputFile();
+
             exit(EXIT_FAILURE);
         }
     }

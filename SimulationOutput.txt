@@ -1,0 +1,15 @@
+Alpha - avg flight time: 100.00 min, avg distance traveled: 200.00 miles,
+avg time charging: 34.50 min, total num faults: 0, total passenger miles: 1600.00 miles
+----------------------------------------------------------------------------------------
+Bravo - avg flight time: 40.00 min, avg distance traveled: 66.67 miles,
+avg time charging: 12.00 min, total num faults: 0, total passenger miles: 2666.67 miles
+----------------------------------------------------------------------------------------
+Charlie - avg flight time: 37.50 min, avg distance traveled: 100.00 miles,
+avg time charging: 48.00 min, total num faults: 0, total passenger miles: 2400.00 miles
+----------------------------------------------------------------------------------------
+Delta - avg flight time: 100.00 min, avg distance traveled: 150.00 miles,
+avg time charging: 31.50 min, total num faults: 2, total passenger miles: 1500.00 miles
+----------------------------------------------------------------------------------------
+Echo - avg flight time: 45.95 min, avg distance traveled: 22.98 miles,
+avg time charging: 18.00 min, total num faults: 9, total passenger miles: 459.54 miles
+----------------------------------------------------------------------------------------

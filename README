@@ -1,3 +1,5 @@
-Take home programming exam - simulating different types of electric aircraft flying and sharing a limited amount of battery chargers
+Take home programming exam - simulating different types of electric aircraft flying and sharing a limited amount of battery chargers.
 
-See the notes\ directory for design decisions and the thought process behind them.
+See the \notes directory for design decisions and the thought process behind them.
+
+Results of the simulation are stored in \SimulationOutput.txt.

@@ -6,3 +6,4 @@
 
 void TestCalculations(void);
 void WriteDataToOutputFile(Aircraft* aircrafts);
+void WriteRandomIdErrorToOutputFile(void);
