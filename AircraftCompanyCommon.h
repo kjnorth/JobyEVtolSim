@@ -14,6 +14,8 @@
 
 #include <cstdint>
 
+#include "Aircraft.h"
+
 #define LOOP_TICKS_PER_MIN          (50u)
 
 #define ALPHA_CRUISE_SPEED_MPH      (120u)
@@ -53,3 +55,9 @@ typedef struct {
   uint32_t passengerCount;
   float faultProbabilityPerHour;
 } aircraft_company_common_t;
+
+bool IsBatteryDead(Aircraft* plane);
+bool IsChargingComplete(Aircraft* plane);
+uint32_t GetCruiseSpeed(aircraft_id_t id);
+uint32_t GetPassengerCount(aircraft_id_t id);
+float GetFaultProbabilityPerHour(aircraft_id_t id);

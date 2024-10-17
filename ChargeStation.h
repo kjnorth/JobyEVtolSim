@@ -22,6 +22,12 @@ public:
     }
     return false;
   }
-  void removeAircraft(void) {m_numChargersInUse--;}
+  bool removeAircraft(void) {
+    if (m_numChargersInUse > 0) {
+      m_numChargersInUse--;
+      return true;
+    }
+    return false;
+  }
 };
 
